@@ -16,10 +16,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 export default function Home() {
 
   const [clickCount, setClickCount] = useState<number>(0); // นับจำนวนครั้งที่กดปุ่ม
+  const [deleteCount, setDeleteCount] = useState<number>(0); // นับจำนวนครั้งที่กดปุ่มลบ
 
   const [freeOn, setFreeOn] = useState<boolean>(false); // สถานะการแสดงหน้าต่าง คนว่างงาน
   const [dino, setDino] = useState<boolean>(false); // สถานะการแสดงหน้าต่าง ไดโนเสาร์
   const [moodeng, setMoodeng] = useState<boolean>(false); // สถานะการแสดงหน้าต่าง หมูเด้ง
+  const [lazy, setLazy] = useState<boolean>(false); // สถานะความขี้เกียจของผู้สร้าง
 
   const [Inputtask, setTask] = useState<string>(""); // ข้อความใน Input
   const [todoList, setTodoList] = useState<task[]>([]); // รายการ Task
@@ -33,7 +35,7 @@ export default function Home() {
       setClickCount(clickCount + 1);
       if (clickCount === 4) {
         setFreeOn(true);
-      setClickCount(clickCount - 4);
+      setClickCount(0);
       } return;
     }
 
@@ -71,12 +73,17 @@ export default function Home() {
     setDino(false);
   }
 
-  // ฟังชั่นปิดหน้าต่าง หมูเด้ง
+  // ฟังก์ชั่นปิดหน้าต่าง หมูเด้ง
   function closeMoodeng(): void {
     setMoodeng(false);
   }
 
-  // ฟังค์ชั่นแก้ไข Task
+  // ฟังก์ชั่นขี้เกียจ
+  function lazybutton(): void {
+    setLazy(!lazy);
+  }
+
+  // ฟังก์ชั่นแก้ไข Task
   function edit(id: number): void {
     const tasktoEdit = todoList.find((task) => task.id === id);
     if (tasktoEdit) {
@@ -86,7 +93,7 @@ export default function Home() {
     }
   }
 
-  // ฟังค์ชั่นบันทึกการแก้ไข
+  // ฟังก์ชั่นบันทึกการแก้ไข
   function seveEdit(id: number): void {
 
     setTodoList(todoList.map((task) => task.id === id ? { ...task, text: editText } : task));
@@ -95,27 +102,58 @@ export default function Home() {
     setEditTask(null);
   }
 
-  // ฟังค์ชั่นลบ Task
+  // ฟังก์ชั่นลบ Task
   function deleteTask(id: number): void {
-    setTodoList(todoList.filter((item) => item.id !== id));
-    console.log("Keep Deleting And It Won't End.");
+    setDeleteCount(deleteCount + 1);
+    console.log(deleteCount)
+    if (deleteCount === 6) {
+    setDeleteCount(0);
+      setTodoList(todoList.filter((item) => item.id !== id));
+    }
   }
 
-  // ฟังค์ชั่นสลับสถานะเสร็จ/ไม่เสร็จ
+  // ฟังก์ชั่นแสดงข้อความก่อนลบ
+  function dontdothat(deleteCount:number): string {
+
+    switch(deleteCount) {
+
+      case 1 :
+        return "Really? Ahh, Nope!";
+      case 2 :
+        return "Nice Try, But You Can't.";
+      case 3 :
+        return "I Can Do This All Day!";
+      case 4 :
+        return "Ok, You Know What? I Give Up—Let's Do It.";
+      case 5 :
+        return "Sorry, Nope! LOL, Ha Ha Ha! 😂";
+      case 6 :
+        return "Really? This Last Chance You Know?";
+      default :
+        return "To Do List";
+    }
+  }
+
+
+
+  // ฟังก์ชั่นสลับสถานะเสร็จ/ไม่เสร็จ
   function Icandothis(id: number): void {
     setTodoList(todoList.map((task) => task.id === id ? { ...task, completed: !task.completed } : task));
   }
 
 
+
+
+
   return (
     <>
       <div className="flex flex-col items-center justify-start min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-sans)] gap-6">
-        <h1>To Do List</h1>
-
+          {/* เรียกใช้ฟังก์ชันแสดงข้อความก่อนลบ */}
+        <h1>{dontdothat(deleteCount)}</h1>
         {/* inputข้อมูล */}
 
         <div className="flex w-full max-w-sm items-center mx-4">
-          <Input className=" border-black border-2" type="text" placeholder="What Will You Do?" value={Inputtask} onChange={(even) => setTask(even.target.value)} />
+          <Input className=" border-black border-2 mx-1" type="text" placeholder="What Will You Do?" value={Inputtask} onChange={(even) => setTask(even.target.value)} />
 
           {/* แจ้งเตือนหน้าต่าง คนว่างงาน */}
           {freeOn ? (<AlertDialog open={freeOn} onOpenChange={closeFree}>
@@ -170,7 +208,10 @@ export default function Home() {
         {/* ตารางแสดงรายการที่ต้องทำ */}
 
         <Table>
-          <TableCaption>You Must To Do That!!</TableCaption>
+          <TableCaption>
+            {lazy === true ? "Do You Know Anything? My Creator Is Very Lazy." : "You Must To Do That!!"}
+
+          </TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">No.</TableHead>
@@ -191,6 +232,7 @@ export default function Home() {
                   <Checkbox
                     checked={item.completed}
                     onClick={() => Icandothis(item.id)}
+                    className="mx-1"
                   />
                   {item.completed === true ? " See? You Made It!!" : " Come On! You Can Do That!!"}
                 </TableCell>
@@ -202,9 +244,9 @@ export default function Home() {
                       onChange={(even) => setEditText(even.target.value)}
                       className=" border-black border-2"
                     />
-                  ) : (
-                    item.text
-                  )}
+                  ) : item.text === "LeafNatsu"? (
+                    <Button onClick={lazybutton}>{item.text}</Button>
+                  ) : (item.text)}
                 </TableCell>
                 <TableCell>{item.date}</TableCell>
                 <TableCell className="text-right">
@@ -213,7 +255,7 @@ export default function Home() {
                   ) : (
                     <Button type="submit" onClick={() => edit(item.id)}>edit</Button>
                   )}
-                  <Button type="submit" onClick={() => deleteTask(item.id)}>delete</Button>
+                  <Button className="mx-1" type="submit" onClick={() => deleteTask(item.id)}>delete</Button>
                 </TableCell>
               </TableRow>
             ))}
