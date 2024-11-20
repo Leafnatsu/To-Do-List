@@ -29,7 +29,7 @@ export default function Home() {
   const [editTask, setEditTask] = useState<number | null>(null);  // สถานะการแก้ไข Task
   const [editText, setEditText] = useState<string>(""); // ข้อความที่จะแก้ไข
 
-  // ฟังชั่นเพิ่ม Task
+  // ฟังก์ชั่นเพิ่ม Task
   function addTask(): void {
     if (Inputtask.trim() === "") {
       setClickCount(clickCount + 1);
@@ -63,12 +63,12 @@ export default function Home() {
     setTask("");
   }
 
-  // ฟังชั่นปิดหน้าต่าง คนว่างงาน
+  // ฟังก์ชั่นปิดหน้าต่าง คนว่างงาน
   function closeFree(): void {
     setFreeOn(false);
   }
 
-  // ฟังชั่นปิดหน้าต่าง ไดโนเสาร์
+  // ฟังก์ชั่นปิดหน้าต่าง ไดโนเสาร์
   function closeDino(): void {
     setDino(false);
   }
