@@ -134,8 +134,6 @@ export default function Home() {
     }
   }
 
-
-
   // ฟังก์ชั่นสลับสถานะเสร็จ/ไม่เสร็จ
   function Icandothis(id: number): void {
     setTodoList(todoList.map((task) => task.id === id ? { ...task, completed: !task.completed } : task));
