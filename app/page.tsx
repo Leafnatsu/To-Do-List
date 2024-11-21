@@ -104,14 +104,20 @@ export default function Home() {
 
   // ฟังก์ชั่นลบ Task
   function deleteTask(id: number): void {
-    setDeleteCount(deleteCount + 1);
-    console.log(deleteCount)
-    if (deleteCount === 6) {
-    setDeleteCount(0);
-      setTodoList(todoList.filter((item) => item.id !== id));
-    }
-  }
+    const tasktoDelete = todoList.find((task) => task.id === id);
+    if (!tasktoDelete) return;
 
+    if (tasktoDelete.completed === false) {
+      setDeleteCount(deleteCount + 1);
+      console.log(deleteCount)
+      if (deleteCount === 6) {
+      setDeleteCount(0);
+        setTodoList(todoList.filter((item) => item.id !== id));
+      }
+      return;
+    }
+    setTodoList(todoList.filter((item) => item.id !== id));
+  }
   // ฟังก์ชั่นแสดงข้อความก่อนลบ
   function dontdothat(deleteCount:number): string {
 
@@ -251,9 +257,11 @@ export default function Home() {
                   {editTask === item.id ? (
                     <Button type="submit" onClick={() => seveEdit(item.id)}>save</Button>
                   ) : (
+                    <>
                     <Button type="submit" onClick={() => edit(item.id)}>edit</Button>
+                    <Button className="mx-1" type="submit" onClick={() => deleteTask(item.id)}>delete</Button>
+                    </>
                   )}
-                  <Button className="mx-1" type="submit" onClick={() => deleteTask(item.id)}>delete</Button>
                 </TableCell>
               </TableRow>
             ))}
