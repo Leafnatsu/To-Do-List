@@ -22,9 +22,11 @@ export default function Home() {
   const [dino, setDino] = useState<boolean>(false); // สถานะการแสดงหน้าต่าง ไดโนเสาร์
   const [moodeng, setMoodeng] = useState<boolean>(false); // สถานะการแสดงหน้าต่าง หมูเด้ง
   const [lazy, setLazy] = useState<boolean>(false); // สถานะความขี้เกียจของผู้สร้าง
+  const [fillterTask, setFillterTask] = useState<boolean>(false); // สถานะการแสดง Task ที่เสร็จแล้ว
 
   const [Inputtask, setTask] = useState<string>(""); // ข้อความใน Input
   const [todoList, setTodoList] = useState<task[]>([]); // รายการ Task
+  const [search, setSearch] = useState<string>(""); // ค้นหา Task
 
   const [editTask, setEditTask] = useState<number | null>(null);  // สถานะการแก้ไข Task
   const [editText, setEditText] = useState<string>(""); // ข้อความที่จะแก้ไข
@@ -35,7 +37,7 @@ export default function Home() {
       setClickCount(clickCount + 1);
       if (clickCount === 4) {
         setFreeOn(true);
-      setClickCount(0);
+        setClickCount(0);
       } return;
     }
 
@@ -111,33 +113,41 @@ export default function Home() {
       setDeleteCount(deleteCount + 1);
       console.log(deleteCount)
       if (deleteCount === 6) {
-      setDeleteCount(0);
+        setDeleteCount(0);
         setTodoList(todoList.filter((item) => item.id !== id));
       }
       return;
     }
     setTodoList(todoList.filter((item) => item.id !== id));
+    setDeleteCount(0);
   }
   // ฟังก์ชั่นแสดงข้อความก่อนลบ
-  function dontdothat(deleteCount:number): string {
+  function dontdothat(deleteCount: number): string {
 
-    switch(deleteCount) {
+    switch (deleteCount) {
 
-      case 1 :
+      case 1:
         return "Really? Ahh, Nope!";
-      case 2 :
+      case 2:
         return "Nice Try, But You Can't.";
-      case 3 :
+      case 3:
         return "I Can Do This All Day!";
-      case 4 :
+      case 4:
         return "Ok, You Know What? I Give Up—Let's Do It.";
-      case 5 :
-        return "Sorry, Nope! LOL, Ha Ha Ha! 😂";
-      case 6 :
+      case 5:
+        return "Sorry, Nope!  Ha! Ha! Ha! 😂";
+      case 6:
         return "Really? This Last Chance You Know?";
-      default :
+      default:
         return "To Do List";
     }
+  }
+
+  //ฟังก์ชั่นยกเลิกการลบ
+  function iwiildothat(): void {
+    setDeleteCount(0);
+    console.log(deleteCount)
+
   }
 
   // ฟังก์ชั่นสลับสถานะเสร็จ/ไม่เสร็จ
@@ -145,16 +155,26 @@ export default function Home() {
     setTodoList(todoList.map((task) => task.id === id ? { ...task, completed: !task.completed } : task));
   }
 
+  // ฟังก์ชั่นแสดง Task ที่เสร็จแล้ว
+  function Taskfillter(): void {
+    setFillterTask(!fillterTask);
+    console.log(fillterTask)
+  }
+
+
+  function searchTask(): void {
+    const search = todoList.filter((item) => item.text === "LeafNatsu");
+    console.log(search)
+  }
 
 
 
   return (
     <>
       <div className="flex flex-col items-center justify-start min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-sans)] gap-6">
-          {/* เรียกใช้ฟังก์ชันแสดงข้อความก่อนลบ */}
+        {/* เรียกใช้ฟังก์ชันแสดงข้อความก่อนลบ */}
         <h1>{dontdothat(deleteCount)}</h1>
         {/* inputข้อมูล */}
-
         <div className="flex w-full max-w-sm items-center mx-4">
           <Input className=" border-black border-2 mx-1" type="text" placeholder="What Will You Do?" value={Inputtask} onChange={(even) => setTask(even.target.value)} />
 
@@ -204,10 +224,22 @@ export default function Home() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+            // ปุ่มเพิ่ม Taskและปุ่มยกเลิกการลบ
+          ) : deleteCount !== 0 ? (
+            <>
+              <Button type="submit" className="mx-1" onClick={addTask}>Add Task</Button>
+              <Button type="submit" onClick={iwiildothat}>OK ! OK ! <br /> I Will Do That</Button>
+            </>
             // ปุ่มเพิ่ม Task
           ) : (<Button type="submit" onClick={addTask}>Add Task</Button>)}
         </div>
-
+        <div className="flex w-full max-w-sm items-center mx-4">
+        <Input className=" border-black border-2 mx-1" type="text" placeholder="What Will You Do?" value={search} onChange={(even) => setTask(even.target.value)} />
+        <Button className="mx-1" onClick={searchTask}>Completed</Button>
+        </div>
+        <div>
+        <Button className="mx-1" onClick={Taskfillter}>Completed</Button>
+        </div>
         {/* ตารางแสดงรายการที่ต้องทำ */}
 
         <Table>
@@ -229,42 +261,47 @@ export default function Home() {
 
           <TableBody>
             {todoList.map((item, index) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">{index + 1}</TableCell>
-                <TableCell>
-                  <Checkbox
-                    checked={item.completed}
-                    onClick={() => Icandothis(item.id)}
-                    className="mx-1"
-                  />
-                  {item.completed === true ? " See? You Made It!!" : " Come On! You Can Do That!!"}
-                </TableCell>
-                <TableCell>
-                  {editTask === item.id ? (
-                    <Input
-                      type="text"
-                      value={editText}
-                      onChange={(even) => setEditText(even.target.value)}
-                      className=" border-black border-2"
+              (fillterTask === false || (fillterTask === true && item.completed)) && (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell>
+                    <Checkbox
+                      checked={item.completed}
+                      onClick={() => Icandothis(item.id)}
+                      className="mx-1"
                     />
-                  ) : item.text === "LeafNatsu"? (
-                    <Button onClick={lazybutton}>{item.text}</Button>
-                  ) : (item.text)}
-                </TableCell>
-                <TableCell>{item.date}</TableCell>
-                <TableCell className="text-right">
-                  {editTask === item.id ? (
-                    <Button type="submit" onClick={() => seveEdit(item.id)}>save</Button>
-                  ) : (
-                    <>
-                    <Button type="submit" onClick={() => edit(item.id)}>edit</Button>
-                    <Button className="mx-1" type="submit" onClick={() => deleteTask(item.id)}>delete</Button>
-                    </>
-                  )}
-                </TableCell>
-              </TableRow>
+                    {item.completed === true ? " See? You Made It!!" : " Come On! You Can Do That!!"}
+                  </TableCell>
+                  <TableCell>
+                    {editTask === item.id ? (
+                      <Input
+                        type="text"
+                        value={editText}
+                        onChange={(even) => setEditText(even.target.value)}
+                        className=" border-black border-2"
+                      />
+                    ) : item.text === "LeafNatsu" ? (
+                      <Button onClick={lazybutton}>{item.text}</Button>
+                    ) : (
+                      item.text
+                    )}
+                  </TableCell>
+                  <TableCell>{item.date}</TableCell>
+                  <TableCell className="text-right">
+                    {editTask === item.id ? (
+                      <Button type="submit" onClick={() => seveEdit(item.id)}>save</Button>
+                    ) : (
+                      <>
+                        <Button type="submit" onClick={() => edit(item.id)}>edit</Button>
+                        <Button className="mx-1" type="submit" onClick={() => deleteTask(item.id)}>delete</Button>
+                      </>
+                    )}
+                  </TableCell>
+                </TableRow>
+              )
             ))}
           </TableBody>
+
         </Table>
 
         {/* สิ้นสุดของตาราง */}
