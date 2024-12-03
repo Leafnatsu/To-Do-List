@@ -6,6 +6,7 @@ import { task } from './type/Task';
 
 // import {deleteTask} from "@/app/function/deleteTask"
 // import {addTask} from "@/app/function/addTask"
+import { dontdothat } from "@/app/function/dontdothat"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -122,26 +123,26 @@ export default function Home() {
     setDeleteCount(0);
   }
   // ฟังก์ชั่นแสดงข้อความก่อนลบ
-  function dontdothat(deleteCount: number): string {
+  // function dontdothat(deleteCount: number): string {
 
-    switch (deleteCount) {
+  //   switch (deleteCount) {
 
-      case 1:
-        return "Really? Ahh, Nope!";
-      case 2:
-        return "Nice Try, But You Can't.";
-      case 3:
-        return "I Can Do This All Day!";
-      case 4:
-        return "Ok, You Know What? I Give Up—Let's Do It.";
-      case 5:
-        return "Sorry, Nope!  Ha! Ha! Ha! 😂";
-      case 6:
-        return "Really? This Last Chance You Know?";
-      default:
-        return "To Do List";
-    }
-  }
+  //     case 1:
+  //       return "Really? Ahh, Nope!";
+  //     case 2:
+  //       return "Nice Try, But You Can't.";
+  //     case 3:
+  //       return "I Can Do This All Day!";
+  //     case 4:
+  //       return "Ok, You Know What? I Give Up—Let's Do It.";
+  //     case 5:
+  //       return "Sorry, Nope!  Ha! Ha! Ha! 😂";
+  //     case 6:
+  //       return "Really? This Last Chance You Know?";
+  //     default:
+  //       return "To Do List";
+  //   }
+  // }
 
   //ฟังก์ชั่นยกเลิกการลบ
   function iwiildothat(): void {
@@ -162,10 +163,10 @@ export default function Home() {
   }
 
 
-  function searchTask(): void {
-    const search = todoList.filter((item) => item.text === "LeafNatsu");
-    console.log(search)
-  }
+  // function searchTask(): void {
+  //   const searchs = todoList.filter((item) => item.text.includes(search));
+  //   console.log(searchs)
+  // }
 
 
 
@@ -234,8 +235,8 @@ export default function Home() {
           ) : (<Button type="submit" onClick={addTask}>Add Task</Button>)}
         </div>
         <div className="flex w-full max-w-sm items-center mx-4">
-        <Input className=" border-black border-2 mx-1" type="text" placeholder="What Will You Do?" value={search} onChange={(even) => setTask(even.target.value)} />
-        <Button className="mx-1" onClick={searchTask}>Completed</Button>
+        <Input className=" border-black border-2 mx-1" type="text" placeholder="What Are You Looking For, Mate?" value={search} onChange={(even) => setSearch(even.target.value)} />
+
         </div>
         <div>
         <Button className="mx-1" onClick={Taskfillter}>Completed</Button>
@@ -260,8 +261,11 @@ export default function Home() {
           {/* ส่วนข้อมูลในตาราง */}
 
           <TableBody>
-            {todoList.map((item, index) => (
-              (fillterTask === false || (fillterTask === true && item.completed)) && (
+            {todoList.filter(
+              (item) => (!fillterTask || item.completed) && //แสดง Task ที่เสร็จแล้ว
+                item.text.includes(search)
+            )
+            .map((item, index) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{index + 1}</TableCell>
                   <TableCell>
@@ -299,7 +303,7 @@ export default function Home() {
                   </TableCell>
                 </TableRow>
               )
-            ))}
+            )}
           </TableBody>
 
         </Table>

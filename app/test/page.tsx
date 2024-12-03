@@ -1,123 +1,192 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table"
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { AlertDialog, AlertDialogAction ,AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
+import { useEffect, useState } from "react"
 
-// กำหนด type สำหรับ Task แต่ละรายการ
-type Task = {
-  id: number; // ID ของ Task
-  text: string; // ข้อความของ Task
-  completed: boolean; // สถานะเสร็จ/ไม่เสร็จ
-  date: string; // วันที่สร้าง Task
-};
+
+import { task } from '../type/Task';
+
+// import {deleteTask} from "@/app/function/deleteTask"
+// import {addTask} from "@/app/function/addTask"
+
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table"
+import { Checkbox } from "@/components/ui/checkbox"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 
 export default function Home() {
-  const [task, setTask] = useState<string>(""); // State สำหรับข้อความใน Input
-  const [todoList, setTodoList] = useState<Task[]>([]); // State สำหรับรายการ To-Do
-  const [editingTaskId, setEditingTaskId] = useState<number | null>(null); // State สำหรับการเก็บ ID ของ Task ที่กำลังแก้ไข
-  const [editedText, setEditedText] = useState<string>(""); // State สำหรับข้อความที่จะแก้ไข
-  const [clickCount, setClickCount] = useState<number>(0);
-  const [freeOn, setFreeOn] = useState<boolean>(false);
-  const [dino, setDino] = useState<boolean>(false);
 
-  // ฟังก์ชันสำหรับเพิ่ม Task
+  const [clickCount, setClickCount] = useState<number>(0); // นับจำนวนครั้งที่กดปุ่ม
+  const [deleteCount, setDeleteCount] = useState<number>(0); // นับจำนวนครั้งที่กดปุ่มลบ
+
+  const [freeOn, setFreeOn] = useState<boolean>(false); // สถานะการแสดงหน้าต่าง คนว่างงาน
+  const [dino, setDino] = useState<boolean>(false); // สถานะการแสดงหน้าต่าง ไดโนเสาร์
+  const [moodeng, setMoodeng] = useState<boolean>(false); // สถานะการแสดงหน้าต่าง หมูเด้ง
+  const [lazy, setLazy] = useState<boolean>(false); // สถานะความขี้เกียจของผู้สร้าง
+  const [fillterTask, setFillterTask] = useState<boolean>(false); // สถานะการแสดง Task ที่เสร็จแล้ว
+
+  const [Inputtask, setTask] = useState<string>(""); // ข้อความใน Input
+  const [todoList, setTodoList] = useState<task[]>([]); // รายการ Task
+  const [search, setSearch] = useState<string>(""); // ค้นหา Task
+
+  const [editTask, setEditTask] = useState<number | null>(null);  // สถานะการแก้ไข Task
+  const [editText, setEditText] = useState<string>(""); // ข้อความที่จะแก้ไข
+
+  useEffect(() => {
+    console.log("I'm a Dinosaur");
+  },[]);
+
+  // ฟังก์ชั่นเพิ่ม Task
   function addTask(): void {
-    if (task.trim() === "") {
+    if (Inputtask.trim() === "") {
       setClickCount(clickCount + 1);
-      if (clickCount === 3) {
+      if (clickCount === 4) {
         setFreeOn(true);
-        // console.log("WoW! I Thing You Must To Do Something.");
-      }
-      return;
+        setClickCount(0);
+      } return;
     }
-    if (task === "Dinosaur") {
-      setDino(true)
+
+    if (Inputtask === "I Am A Dinosaur") {
+      setDino(true);
       return;
     }
 
 
-    const newTask: Task = {
-      id: Date.now(), // ใช้ timestamp เป็น ID
-      text: task,
+
+    if (Inputtask === "หมูเด้ง") {
+      setMoodeng(true);
+      return;
+    }
+
+
+    const newTask: task = {
+      id: Date.now(),
+      text: Inputtask,
       completed: false,
-      date: new Date().toLocaleDateString(), // วันที่ปัจจุบัน
+      date: new Date().toLocaleDateString(),
+
     };
 
-    setTodoList([...todoList, newTask]); // เพิ่ม Task ใหม่
-    setTask(""); // ล้าง input หลังจากเพิ่ม Task
+    setTodoList([...todoList, newTask]);
+    setTask("");
   }
 
+  // ฟังก์ชั่นปิดหน้าต่าง คนว่างงาน
   function closeFree(): void {
     setFreeOn(false);
   }
 
+  // ฟังก์ชั่นปิดหน้าต่าง ไดโนเสาร์
   function closeDino(): void {
     setDino(false);
   }
 
-  // ฟังก์ชันลบ Task
-  function deleteTask(id: number): void {
-    setTodoList(todoList.filter((item) => item.id !== id));
-    console.log("Keep Deleting And It Won't End.");
+  // ฟังก์ชั่นปิดหน้าต่าง หมูเด้ง
+  function closeMoodeng(): void {
+    setMoodeng(false);
   }
 
-  // ฟังก์ชันสลับสถานะเสร็จ/ไม่เสร็จ
-  function toggleCompleted(id: number): void {
-    setTodoList(
-      todoList.map((item) =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      )
-    );
+  // ฟังก์ชั่นขี้เกียจ
+  function lazybutton(): void {
+    setLazy(!lazy);
   }
 
-  // ฟังก์ชันสำหรับเริ่มต้นการแก้ไข Task
-  function editTask(id: number): void {
-    const taskToEdit = todoList.find((task) => task.id === id); // หาข้อมูล Task ที่ต้องการแก้ไข
-    if (taskToEdit) {
-      setEditedText(taskToEdit.text); // กำหนดข้อความที่จะแก้ไข
-      setEditingTaskId(id); // ตั้งค่า ID ของ Task ที่กำลังแก้ไข
+  // ฟังก์ชั่นแก้ไข Task
+  function edit(id: number): void {
+    const tasktoEdit = todoList.find((task) => task.id === id);
+    if (tasktoEdit) {
+
+      setEditText(tasktoEdit.text)
+      setEditTask(id);
     }
   }
 
-  // ฟังก์ชันสำหรับบันทึกการแก้ไข Task
-  function saveEditedTask(): void {
-    if (editingTaskId === null || editedText.trim() === "") return;
+  // ฟังก์ชั่นบันทึกการแก้ไข
+  function seveEdit(id: number): void {
 
-    setTodoList(
-      todoList.map((task) =>
-        task.id === editingTaskId ? { ...task, text: editedText } : task
-      )
-    );
-    setEditedText(""); // ล้างข้อความที่แก้ไข
-    setEditingTaskId(null); // รีเซ็ตการแก้ไข
+    setTodoList(todoList.map((task) => task.id === id ? { ...task, text: editText } : task));
+
+    setEditText("");
+    setEditTask(null);
   }
 
-  // ฟังก์ชันสำหรับอัปเดตข้อความที่กำลังแก้ไข
-  // function handleEditTextChange(event: React.ChangeEvent<HTMLInputElement>): void {
-  //   setEditedText(event.target.value);
+  // ฟังก์ชั่นลบ Task
+  function deleteTask(id: number): void {
+    const tasktoDelete = todoList.find((task) => task.id === id);
+    if (!tasktoDelete) return;
+
+    if (tasktoDelete.completed === false) {
+      setDeleteCount(deleteCount + 1);
+      console.log(deleteCount)
+      if (deleteCount === 6) {
+        setDeleteCount(0);
+        setTodoList(todoList.filter((item) => item.id !== id));
+      }
+      return;
+    }
+    setTodoList(todoList.filter((item) => item.id !== id));
+    setDeleteCount(0);
+  }
+  // ฟังก์ชั่นแสดงข้อความก่อนลบ
+  function dontdothat(deleteCount: number): string {
+
+    switch (deleteCount) {
+
+      case 1:
+        return "Really? Ahh, Nope!";
+      case 2:
+        return "Nice Try, But You Can't.";
+      case 3:
+        return "I Can Do This All Day!";
+      case 4:
+        return "Ok, You Know What? I Give Up—Let's Do It.";
+      case 5:
+        return "Sorry, Nope!  Ha! Ha! Ha! 😂";
+      case 6:
+        return "Really? This Last Chance You Know?";
+      default:
+        return "To Do List";
+    }
+  }
+
+  //ฟังก์ชั่นยกเลิกการลบ
+  function iwiildothat(): void {
+    setDeleteCount(0);
+    console.log(deleteCount)
+
+  }
+
+  // ฟังก์ชั่นสลับสถานะเสร็จ/ไม่เสร็จ
+  function Icandothis(id: number): void {
+    setTodoList(todoList.map((task) => task.id === id ? { ...task, completed: !task.completed } : task));
+  }
+
+  // ฟังก์ชั่นแสดง Task ที่เสร็จแล้ว
+  function Taskfillter(): void {
+    setFillterTask(!fillterTask);
+    console.log(fillterTask)
+  }
+
+
+  // function searchTask(): void {
+  //   const searchs = todoList.filter((item) => item.text.includes(search));
+  //   console.log(searchs)
   // }
 
-  return (
-    <div className="flex flex-col items-center justify-start min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-sans)] gap-6">
-      <h1>To Do List</h1>
-      <div className="flex w-full max-w-sm items-center mx-4">
-        {/* Input สำหรับกรอก Task */}
-        <Input
-          type="text"
-          placeholder="What Will You Do?"
-          value={task}
-          onChange={(e) => setTask(e.target.value)}
-          className="input-class border-black border-2"
 
-        />
-        {/* ปุ่มเพิ่ม Task */}
-        {freeOn ? (
-          <AlertDialog open={freeOn} onOpenChange={closeFree}>
-            <AlertDialogTrigger><Button>Add Task</Button></AlertDialogTrigger>
+
+  return (
+    <>
+      <div className="flex flex-col items-center justify-start min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-sans)] gap-6">
+        {/* เรียกใช้ฟังก์ชันแสดงข้อความก่อนลบ */}
+        <h1>{dontdothat(deleteCount)}</h1>
+        {/* inputข้อมูล */}
+        <div className="flex w-full max-w-sm items-center mx-4">
+          <Input className=" border-black border-2 mx-1" type="text" placeholder="What Will You Do?" value={Inputtask} onChange={(even) => setTask(even.target.value)} />
+
+          {/* แจ้งเตือนหน้าต่าง คนว่างงาน */}
+          {freeOn ? (<AlertDialog open={freeOn} onOpenChange={closeFree}>
+            <AlertDialogTrigger>Add Task</AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Seriously?! Are You Free?</AlertDialogTitle>
@@ -130,14 +199,14 @@ export default function Home() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        ) : dino ? (
-          <AlertDialog open={dino} onOpenChange={closeDino}>
-            <AlertDialogTrigger><Button>Add Task</Button></AlertDialogTrigger>
+            // แจ้งเตือนหน้าต่าง ไดโนเสาร์
+          ) : dino ? (<AlertDialog open={dino} onOpenChange={closeDino}>
+            <AlertDialogTrigger>Add Task</AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Oh! Wait, You Are a Dinosaur?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Ok, Follow Me. I Will Take You Home :
+                  Ok, Follow Me. I Will Take You Home Click Go Home For Your Life.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -146,65 +215,109 @@ export default function Home() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        ) : (<Button type="button" onClick={addTask}>
-          Add Task
-        </Button>)}
+            // แจ้งเตือนหน้าต่าง หมูเด้ง
+          ) : moodeng ? (<AlertDialog open={moodeng} onOpenChange={closeMoodeng}>
+            <AlertDialogTrigger>Add Task</AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>หมูเด้ง หมูเด้ง หมูเด้ง</AlertDialogTitle>
+                <AlertDialogDescription>
+                  <iframe width="460" height="315" src="https://www.youtube.com/embed/4noyAoMa7bQ?si=ZK-PuMwiVK2GWhYG" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={closeMoodeng}>Close</AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+            // ปุ่มเพิ่ม Taskและปุ่มยกเลิกการลบ
+          ) : deleteCount !== 0 ? (
+            <>
+              <Button type="submit" className="mx-1" onClick={addTask}>Add Task</Button>
+              <Button type="submit" onClick={iwiildothat}>OK ! OK ! <br /> I Will Do That</Button>
+            </>
+            // ปุ่มเพิ่ม Task
+          ) : (<Button type="submit" onClick={addTask}>Add Task</Button>)}
+        </div>
+        <div className="flex w-full max-w-sm items-center mx-4">
+        <Input className=" border-black border-2 mx-1" type="text" placeholder="What Are You Looking For, Mate?" value={search} onChange={(even) => setSearch(even.target.value)} />
+
+        </div>
+        <div>
+        <Button className="mx-1" onClick={Taskfillter}>Completed</Button>
+        </div>
+        {/* ตารางแสดงรายการที่ต้องทำ */}
+
+        <Table>
+          <TableCaption>
+            {lazy === true ? "Do You Know Anything? My Creator Is Very Lazy." : "You Must To Do That!!"}
+
+          </TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">No.</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Things to do</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead className="text-right">Tools</TableHead>
+            </TableRow>
+          </TableHeader>
+
+          {/* ส่วนข้อมูลในตาราง */}
+
+          <TableBody>
+            {todoList.filter(
+              (item) => (!fillterTask || item.completed) && //แสดง Task ที่เสร็จแล้ว
+                item.text.includes(search)
+            )
+            .map((item, index) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell>
+                    <Checkbox
+                      checked={item.completed}
+                      onClick={() => Icandothis(item.id)}
+                      className="mx-1"
+                    />
+                    {item.completed === true ? " See? You Made It!!" : " Come On! You Can Do That!!"}
+                  </TableCell>
+                  <TableCell>
+                    {editTask === item.id ? (
+                      <Input
+                        type="text"
+                        value={editText}
+                        onChange={(even) => setEditText(even.target.value)}
+                        className=" border-black border-2"
+                      />
+                    ) : item.text === "LeafNatsu" ? (
+                      <Button onClick={lazybutton}>{item.text}</Button>
+                    ) : (
+                      item.text
+                    )}
+                  </TableCell>
+                  <TableCell>{item.date}</TableCell>
+                  <TableCell className="text-right">
+                    {editTask === item.id ? (
+                      <Button type="submit" onClick={() => seveEdit(item.id)}>save</Button>
+                    ) : (
+                      <>
+                        <Button type="submit" onClick={() => edit(item.id)}>edit</Button>
+                        <Button className="mx-1" type="submit" onClick={() => deleteTask(item.id)}>delete</Button>
+                      </>
+                    )}
+                  </TableCell>
+                </TableRow>
+              )
+            )}
+          </TableBody>
+
+        </Table>
+
+        {/* สิ้นสุดของตาราง */}
+
       </div>
 
-      {/* ตาราง To-Do */}
-      <Table>
-        <TableCaption>Your Task List</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px]">No.</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Things to do</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead className="text-right">Tools</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {todoList.map((item, index) => (
-            <TableRow key={item.id}>
-              <TableCell className="font-medium">{index + 1}</TableCell>
-              <TableCell>
-                <Checkbox
-                  checked={item.completed}
-                  onClick={() => toggleCompleted(item.id)}
-                />
-                {item.completed === true ? " See? You Can Do That!!" : " Come On! You Must To Do That!!"}
-              </TableCell>
-
-              {/* ถ้า Task กำลังอยู่ในสถานะที่กำลังแก้ไข */}
-              <TableCell>
-                {editingTaskId === item.id ? (
-                  <input
-                    type="text"
-                    value={editedText}
-                    onChange={(even) => setEditedText(even.target.value)}
-                    className="input-class  border-black border-2"
-                  />
-                ) : (
-                  item.text
-                )}
-              </TableCell>
-              <TableCell>{item.date}</TableCell>
-              <TableCell className="text-right">
-                {/* แสดงปุ่ม Edit หรือ Save ขึ้นอยู่กับสถานะการแก้ไข */}
-                {editingTaskId === item.id ? (
-                  <Button onClick={saveEditedTask}>Save</Button>
-                ) : (
-                  <Button onClick={() => editTask(item.id)}>Edit</Button>
-                )}
-                <Button onClick={() => deleteTask(item.id)}>Delete</Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    </>
   );
 }
 
-
-// อันนี้เป็นโค้ดจากgptไม่เอาส่งแค่เอามาลองดูการทำงารมันของมัน

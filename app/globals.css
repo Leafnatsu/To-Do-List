@@ -88,3 +88,6 @@ h1 {
 .justify-start {
   justify-content: start;
 }
+.item-left {
+  align-self: left;
+}
